@@ -51,7 +51,7 @@ $isMember = $user && $user['role'] === 'member';
     </div>
   </div>
 
-  <div class="app-split-grid<?= $isAdmin ? '' : ' single-column-grid' ?>">
+  <div class="app-split-grid<?= $isAdmin ? ($editing ? ' is-editing' : '') : ' single-column-grid' ?>">
     
     <!-- Left Column: Bookings Table -->
     <div class="app-main-col">
@@ -195,8 +195,14 @@ $isMember = $user && $user['role'] === 'member';
     <!-- Right Column: Admin Booking Create/Edit Form -->
     <?php if ($isAdmin): ?>
       <div class="app-side-col">
-        <div class="form-card" id="booking-form-card">
+        <div class="form-card<?= $editing ? ' is-editing-mode' : '' ?>" id="booking-form-card">
           <div class="form-card-header">
+            <?php if ($editing): ?>
+              <div class="editing-pill-tag">
+                <span>Mode: Editing Reservation #<?= (int)$editing['booking_id'] ?></span>
+                <a href="<?= View::e($base) ?>/bookings" class="btn-cancel-edit-sm" title="Exit editing">&times; Cancel Edit</a>
+              </div>
+            <?php endif; ?>
             <h3 class="form-card-title"><?= $editing ? 'Edit Reservation #' . (int)$editing['booking_id'] : 'Manual Booking' ?></h3>
             <p class="form-card-sub"><?= $editing ? 'Modify assigned member or class.' : 'Reserve a class spot on behalf of a member.' ?></p>
           </div>

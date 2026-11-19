@@ -27,7 +27,7 @@ $isAdmin = $user && $user['role'] === 'admin';
     </div>
   </div>
 
-  <div class="app-split-grid">
+  <div class="app-split-grid<?= $editing ? ' is-editing' : '' ?>">
     
     <!-- Left Column: Trainers Table / Directory -->
     <div class="app-main-col">
@@ -117,8 +117,14 @@ $isAdmin = $user && $user['role'] === 'admin';
     <!-- Right Column: Add / Edit Form (Admin Only) -->
     <?php if ($isAdmin): ?>
       <div class="app-side-col">
-        <div class="form-card" id="trainer-form-card">
+        <div class="form-card<?= $editing ? ' is-editing-mode' : '' ?>" id="trainer-form-card">
           <div class="form-card-header">
+            <?php if ($editing): ?>
+              <div class="editing-pill-tag">
+                <span>Mode: Editing Coach #<?= (int)$editing['trainer_id'] ?></span>
+                <a href="<?= View::e($base) ?>/trainers" class="btn-cancel-edit-sm" title="Exit editing">&times; Cancel Edit</a>
+              </div>
+            <?php endif; ?>
             <h3 class="form-card-title"><?= $editing ? 'Edit Coach #' . (int)$editing['trainer_id'] : 'Add New Coach' ?></h3>
             <p class="form-card-sub"><?= $editing ? 'Update coach information.' : 'Register a certified trainer to lead gym sessions.' ?></p>
           </div>

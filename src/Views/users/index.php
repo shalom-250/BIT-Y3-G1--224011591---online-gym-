@@ -44,7 +44,7 @@ $base = $baseUrl ?? '/online-gym/public';
     </div>
   </div>
 
-  <div class="app-split-grid">
+  <div class="app-split-grid<?= $editing ? ' is-editing' : '' ?>">
     
     <!-- Left Column: Users Table -->
     <div class="app-main-col">
@@ -143,8 +143,14 @@ $base = $baseUrl ?? '/online-gym/public';
 
     <!-- Right Column: Add / Edit Form -->
     <div class="app-side-col">
-      <div class="form-card" id="user-form-card">
+      <div class="form-card<?= $editing ? ' is-editing-mode' : '' ?>" id="user-form-card">
         <div class="form-card-header">
+          <?php if ($editing): ?>
+            <div class="editing-pill-tag">
+              <span>Mode: Editing User #<?= (int)$editing['user_id'] ?></span>
+              <a href="<?= View::e($base) ?>/users" class="btn-cancel-edit-sm" title="Exit editing">&times; Cancel Edit</a>
+            </div>
+          <?php endif; ?>
           <h3 class="form-card-title"><?= $editing ? 'Edit User #' . (int)$editing['user_id'] : 'Create New Account' ?></h3>
           <p class="form-card-sub"><?= $editing ? 'Update credentials or system role.' : 'Register user with bcrypt hashed password.' ?></p>
         </div>

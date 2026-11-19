@@ -28,7 +28,7 @@ $canManage = $user && in_array($user['role'], ['admin', 'trainer'], true);
     </div>
   </div>
 
-  <div class="app-split-grid">
+  <div class="app-split-grid<?= $editing ? ' is-editing' : '' ?>">
     
     <!-- Left Column: Classes Table / List -->
     <div class="app-main-col">
@@ -58,10 +58,16 @@ $canManage = $user && in_array($user['role'], ['admin', 'trainer'], true);
                   $isBooked = in_array((int)$c['class_id'], $userBookedClassIds, true);
                   $pct = $c['capacity'] > 0 ? round(($c['booked_count'] / $c['capacity']) * 100) : 0;
                   $searchMeta = strtolower($c['name'] . ' ' . $c['trainer_name'] . ' ' . $c['trainer_specialization']);
+                  $isCurrentEditing = $editing && (int)$editing['class_id'] === (int)$c['class_id'];
                 ?>
-                  <tr data-search="<?= View::e($searchMeta) ?>" data-class-id="<?= (int)$c['class_id'] ?>">
+                  <tr data-search="<?= View::e($searchMeta) ?>" data-class-id="<?= (int)$c['class_id'] ?>" class="<?= $isCurrentEditing ? 'row-editing-active' : '' ?>">
                     <td>
-                      <div class="table-primary-text font-bold"><?= View::e($c['name']) ?></div>
+                      <div class="table-primary-text font-bold">
+                        <?= View::e($c['name']) ?>
+                        <?php if ($isCurrentEditing): ?>
+                          <span class="badge-status badge-warning" style="font-size: 0.65rem; margin-left: 0.3rem;">Editing Now</span>
+                        <?php endif; ?>
+                      </div>
                       <span class="text-xs text-muted">ID: #<?= (int)$c['class_id'] ?></span>
                     </td>
                     <td>
@@ -142,8 +148,14 @@ $canManage = $user && in_array($user['role'], ['admin', 'trainer'], true);
     <!-- Right Column: Add / Edit Form (For Admin & Trainers) -->
     <?php if ($canManage): ?>
       <div class="app-side-col">
-        <div class="form-card" id="class-form-card">
+        <div class="form-card<?= $editing ? ' is-editing-mode' : '' ?>" id="class-form-card">
           <div class="form-card-header">
+            <?php if ($editing): ?>
+              <div class="editing-pill-tag">
+                <span>Mode: Editing Class #<?= (int)$editing['class_id'] ?></span>
+                <a href="<?= View::e($base) ?>/classes" class="btn-cancel-edit-sm" title="Exit editing">&times; Cancel Edit</a>
+              </div>
+            <?php endif; ?>
             <h3 class="form-card-title"><?= $editing ? 'Edit Class #' . (int)$editing['class_id'] : 'Schedule New Class' ?></h3>
             <p class="form-card-sub"><?= $editing ? 'Update class parameters and trainer.' : 'Create a new fitness session for members.' ?></p>
           </div>

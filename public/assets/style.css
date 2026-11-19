@@ -1163,9 +1163,20 @@ button, input, select, textarea {
 
 .app-split-grid {
   display: grid;
-  grid-template-columns: 1fr 380px;
-  gap: 2rem;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 380px);
+  gap: 1.75rem;
   align-items: start;
+  width: 100%;
+}
+
+.app-main-col {
+  min-width: 0;
+  width: 100%;
+}
+
+.app-side-col {
+  min-width: 0;
+  width: 100%;
 }
 
 .single-column-grid {
@@ -1244,12 +1255,14 @@ button, input, select, textarea {
 .table-responsive {
   width: 100%;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .data-table {
   width: 100%;
   border-collapse: collapse;
   text-align: left;
+  min-width: 540px;
 }
 
 .data-table th {
@@ -1259,13 +1272,13 @@ button, input, select, textarea {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  padding: 0.85rem 1.5rem;
+  padding: 0.75rem 1rem;
   border-bottom: 1px solid var(--color-border);
   white-space: nowrap;
 }
 
 .data-table td {
-  padding: 1rem 1.5rem;
+  padding: 0.85rem 1rem;
   border-bottom: 1px solid var(--color-border-subtle);
   font-size: 0.88rem;
   color: var(--color-text-main);
@@ -1482,10 +1495,55 @@ button, input, select, textarea {
   background: #ffffff;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
-  padding: 1.75rem;
+  padding: 1.5rem;
   box-shadow: var(--shadow-sm);
-  position: sticky;
-  top: 5rem;
+  scroll-margin-top: 5.5rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+@media (min-width: 1025px) {
+  .form-card {
+    position: sticky;
+    top: 5rem;
+    max-height: calc(100vh - 6rem);
+    overflow-y: auto;
+  }
+}
+
+.form-card.is-editing-mode {
+  border-color: var(--color-hero-accent);
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.2), var(--shadow-md);
+}
+
+.editing-pill-tag {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  color: #c2410c;
+  padding: 0.35rem 0.75rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.75rem;
+  font-weight: 700;
+  margin-bottom: 0.85rem;
+}
+
+.btn-cancel-edit-sm {
+  color: #9a3412;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-decoration: underline;
+  transition: color 0.15s ease;
+}
+
+.btn-cancel-edit-sm:hover {
+  color: #ea580c;
+}
+
+.row-editing-active {
+  background-color: #fff7ed !important;
+  border-left: 3px solid var(--color-hero-accent);
 }
 
 .form-card-header {
@@ -1942,6 +2000,17 @@ button, input, select, textarea {
 
   .app-split-grid {
     grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  /* When editing on mobile/tablet, bring the edit form to the very top */
+  .app-split-grid.is-editing {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .app-split-grid.is-editing .app-side-col {
+    order: -1;
   }
 
   .quick-bar-card {
@@ -2016,5 +2085,49 @@ button, input, select, textarea {
 
   .footer-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .app-layout-container {
+    padding-top: 1.25rem;
+    padding-bottom: 2.5rem;
+  }
+
+  .page-header-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+
+  .header-action-group {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+  }
+
+  .search-input-wrapper, .search-field {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .data-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem;
+  }
+
+  .form-card {
+    padding: 1.25rem 1rem;
+  }
+
+  .data-table th, .data-table td {
+    padding: 0.7rem 0.75rem;
+    font-size: 0.825rem;
+  }
+
+  .capacity-cell {
+    min-width: 110px;
   }
 }
