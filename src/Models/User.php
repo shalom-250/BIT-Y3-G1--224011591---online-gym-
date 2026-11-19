@@ -19,10 +19,13 @@ final class User {
         $stmt = Database::pdo()->prepare(
             'SELECT user_id, username, email, password_hash, role, created_at 
              FROM users 
-             WHERE username = :identifier OR email = :identifier 
+             WHERE username = :id1 OR email = :id2 
              LIMIT 1'
         );
-        $stmt->execute(['identifier' => $usernameOrEmail]);
+        $stmt->execute([
+            'id1' => $usernameOrEmail,
+            'id2' => $usernameOrEmail,
+        ]);
         $row = $stmt->fetch();
         return $row ?: null;
     }

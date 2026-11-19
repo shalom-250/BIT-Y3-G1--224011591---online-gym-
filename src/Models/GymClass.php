@@ -37,8 +37,13 @@ final class GymClass {
 
         $params = [];
         if ($search !== null && trim($search) !== '') {
-            $sql .= ' WHERE (c.name LIKE :q OR t.full_name LIKE :q OR t.specialization LIKE :q)';
-            $params['q'] = '%' . trim($search) . '%';
+            $sql .= ' WHERE (c.name LIKE :q1 OR t.full_name LIKE :q2 OR t.specialization LIKE :q3)';
+            $qVal = '%' . trim($search) . '%';
+            $params = [
+                'q1' => $qVal,
+                'q2' => $qVal,
+                'q3' => $qVal,
+            ];
         }
 
         $sql .= ' GROUP BY c.class_id ORDER BY c.schedule_time ASC';
