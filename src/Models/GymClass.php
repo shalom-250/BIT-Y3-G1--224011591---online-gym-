@@ -116,6 +116,25 @@ final class GymClass {
         return $stmt->rowCount() > 0;
     }
 
+    /**
+     * Update a class without changing trainer_id assignment.
+     * Used by trainers who can edit class details but not reassign the coach.
+     */
+    public static function updateWithoutTrainer(int $id, array $data): bool {
+        $stmt = Database::pdo()->prepare(
+            'UPDATE classes 
+             SET name = :name, schedule_time = :schedule_time, capacity = :capacity 
+             WHERE class_id = :id'
+        );
+        $stmt->execute([
+            'id'            => $id,
+            'name'          => $data['name'],
+            'schedule_time' => $data['schedule_time'],
+            'capacity'      => (int)$data['capacity'],
+        ]);
+        return $stmt->rowCount() > 0;
+    }
+
     public static function delete(int $id): bool {
         $stmt = Database::pdo()->prepare('DELETE FROM classes WHERE class_id = :id');
         $stmt->execute(['id' => $id]);

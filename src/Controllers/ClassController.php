@@ -39,7 +39,7 @@ final class ClassController {
         }
 
         View::render('classes/index', [
-            'title'              => 'Fitness Classes — BraVaa Gym',
+            'title'              => 'Fitness Classes – BraVaa Gym',
             'baseUrl'            => self::BASE,
             'flash'              => $flash,
             'errors'             => $errors,
@@ -64,8 +64,19 @@ final class ClassController {
 
         Csrf::validateOrAbort(self::BASE . '/classes');
 
-        $id = (int)($_POST['id'] ?? 0);
-        [$data, $errors] = ClassValidator::validate($_POST);
+        $user    = AuthGuard::user();
+        $isAdmin = $user && $user['role'] === 'admin';
+        $id      = (int)($_POST['id'] ?? 0);
+
+        // Trainers cannot change the assigned coach on existing classes — restore existing trainer_id from DB
+        if (!$isAdmin && $id > 0) {
+            $existing = GymClass::find($id);
+            if ($existing) {
+                $_POST['trainer_id'] = (string)$existing['trainer_id'];
+            }
+        }
+
+        [$data, $errors] = ClassValidator::validate($_POST, $isAdmin);
 
         if ($errors) {
             Flash::setErrors($errors);
@@ -76,7 +87,11 @@ final class ClassController {
 
         try {
             if ($id > 0) {
-                $changed = GymClass::update($id, $data);
+                // Admins update all 4 fields; trainers update name/schedule/capacity only
+                $changed = $isAdmin
+                    ? GymClass::update($id, $data)
+                    : GymClass::updateWithoutTrainer($id, $data);
+
                 Flash::set(
                     $changed ? 'success' : 'info',
                     $changed ? 'Fitness class updated successfully.' : 'No changes were detected.'
@@ -94,7 +109,8 @@ final class ClassController {
     }
 
     public function delete(): void {
-        AuthGuard::requireRole(['admin', 'trainer'], '/classes');
+        // ONLY admins may delete classes — trainers are blocked
+        AuthGuard::requireRole(['admin'], '/classes');
 
         if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
             http_response_code(405);

@@ -46,14 +46,14 @@
         <div class="student-info-card">
           <p><strong>Student:</strong> NIYONKURU SHALOM</p>
           <p><strong>Reg. No:</strong> 224011591</p>
-          <p><strong>Course:</strong> Web Technology / Day 1 – 10</p>
-          <p><strong>Location:</strong> Kigali Hub · Open 05:00 - 22:00</p>
+          <p><strong>Course:</strong> Web Programming / Day 1 – 10</p>
+          <p><strong>Location:</strong> Huye Hub · Open 05:00 - 22:00</p>
         </div>
       </div>
     </div>
 
     <div class="footer-bottom">
-      <p>&copy; <?= date('Y') ?> BraVaa Fitness. All rights reserved. Built with pure Vanilla PHP, JavaScript &amp; CSS.</p>
+      <p>&copy; <?= date('Y') ?> BraGym Fitness. All rights reserved. Built with pure Vanilla PHP, JavaScript &amp; CSS.</p>
       <div class="footer-tech-stack">
         <span>PHP 8.2+ PDO</span> &bull; 
         <span>MySQL 3NF</span> &bull; 

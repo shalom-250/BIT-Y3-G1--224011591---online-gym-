@@ -2,7 +2,8 @@
 use App\Support\View;
 use App\Services\Csrf;
 
-$base = $baseUrl ?? '/online-gym/public';
+$base      = $baseUrl ?? '/online-gym/public';
+$isAdmin   = $user && $user['role'] === 'admin';
 $canManage = $user && in_array($user['role'], ['admin', 'trainer'], true);
 ?>
 
@@ -36,7 +37,15 @@ $canManage = $user && in_array($user['role'], ['admin', 'trainer'], true);
         <div class="data-card-header">
           <div class="card-title-box">
             <h3 class="card-title">Available Classes (<?= count($classes) ?>)</h3>
-            <span class="card-sub"><?= $canManage ? 'Full Admin & Trainer Schedule Controls' : 'Instant Reservation System' ?></span>
+            <span class="card-sub">
+              <?php if ($isAdmin): ?>
+                Full Admin Controls — Assign Coaches &amp; Manage All Classes
+              <?php elseif ($canManage): ?>
+                Trainer Access — Edit Class Details (Coach Assignment by Admin Only)
+              <?php else: ?>
+                Instant Reservation System
+              <?php endif; ?>
+            </span>
           </div>
           <span class="badge-tag">classes table</span>
         </div>
@@ -95,14 +104,17 @@ $canManage = $user && in_array($user['role'], ['admin', 'trainer'], true);
                     </td>
                     <td style="text-align: right;">
                       <div class="table-actions-cell" style="justify-content: flex-end;">
+
                         <?php if ($canManage): ?>
-                          <!-- Edit Button -->
+                          <!-- Edit Button — available to both admin and trainer -->
                           <a href="<?= View::e($base) ?>/classes?edit=<?= (int)$c['class_id'] ?>#class-form-card" class="btn-action btn-action-edit" title="Edit Class">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                             <span>Edit</span>
                           </a>
+                        <?php endif; ?>
 
-                          <!-- Delete Form -->
+                        <?php if ($isAdmin): ?>
+                          <!-- Delete Form — ADMIN ONLY -->
                           <form action="<?= View::e($base) ?>/classes/delete" method="POST" class="delete-form d-inline" data-label="Class: <?= View::e($c['name']) ?>">
                             <?= Csrf::field() ?>
                             <input type="hidden" name="id" value="<?= (int)$c['class_id'] ?>">
@@ -128,6 +140,7 @@ $canManage = $user && in_array($user['role'], ['admin', 'trainer'], true);
                         <?php elseif (!$user): ?>
                           <a href="<?= View::e($base) ?>/login" class="btn-table-book">Book Gym Class</a>
                         <?php endif; ?>
+
                       </div>
                     </td>
                   </tr>
@@ -143,7 +156,7 @@ $canManage = $user && in_array($user['role'], ['admin', 'trainer'], true);
       </div>
     </div>
 
-    <!-- Right Column: Add / Edit Form (For Admin & Trainers) -->
+    <!-- Right Column: Add / Edit Form -->
     <?php if ($canManage): ?>
       <div class="app-side-col">
         <div class="form-card<?= $editing ? ' is-editing-mode' : '' ?>" id="class-form-card">
@@ -155,7 +168,15 @@ $canManage = $user && in_array($user['role'], ['admin', 'trainer'], true);
               </div>
             <?php endif; ?>
             <h3 class="form-card-title"><?= $editing ? 'Edit Class #' . (int)$editing['class_id'] : 'Schedule New Class' ?></h3>
-            <p class="form-card-sub"><?= $editing ? 'Update class parameters and trainer.' : 'Create a new fitness session for members.' ?></p>
+            <p class="form-card-sub">
+              <?php if ($editing && !$isAdmin): ?>
+                Update class name, schedule &amp; capacity. <strong>Coach assignment is managed by Admin.</strong>
+              <?php elseif ($editing): ?>
+                Update class parameters and trainer assignment.
+              <?php else: ?>
+                Create a new fitness session for members.
+              <?php endif; ?>
+            </p>
           </div>
 
           <form action="<?= View::e($base) ?>/classes/save" method="POST" novalidate id="class-form">
@@ -179,22 +200,58 @@ $canManage = $user && in_array($user['role'], ['admin', 'trainer'], true);
               <?php endif; ?>
             </div>
 
-            <!-- Trainer Select (FK constraint) -->
+            <!-- Trainer / Coach Assignment -->
             <div class="form-group">
-              <label for="class-trainer" class="form-label">Assigned Coach (FK &rarr; trainers) *</label>
-              <select name="trainer_id" id="class-trainer" class="form-control<?= !empty($errors['trainer_id']) ? ' is-invalid' : '' ?>" required>
-                <option value="">-- Select Trainer --</option>
-                <?php 
-                  $selectedTrainer = (int)($old['trainer_id'] ?? ($editing['trainer_id'] ?? 0));
-                  foreach ($trainers as $t): 
-                ?>
-                  <option value="<?= (int)$t['trainer_id'] ?>" <?= $selectedTrainer === (int)$t['trainer_id'] ? 'selected' : '' ?>>
-                    <?= View::e($t['full_name']) ?> (<?= View::e($t['specialization']) ?>)
-                  </option>
-                <?php endforeach; ?>
-              </select>
-              <?php if (!empty($errors['trainer_id'])): ?>
-                <span class="field-error-msg"><?= View::e($errors['trainer_id']) ?></span>
+              <label for="class-trainer" class="form-label">
+                Assigned Coach (FK &rarr; trainers) *
+                <?php if (!$isAdmin && $editing): ?>
+                  <span class="badge-status badge-warning" style="margin-left:.4rem; font-size:.65rem; vertical-align:middle;">Admin-Only Field</span>
+                <?php endif; ?>
+              </label>
+
+              <?php if ($isAdmin): ?>
+                <!-- Admin: full dropdown to assign any trainer -->
+                <select name="trainer_id" id="class-trainer" class="form-control<?= !empty($errors['trainer_id']) ? ' is-invalid' : '' ?>" required>
+                  <option value="">-- Select Trainer --</option>
+                  <?php 
+                    $selectedTrainer = (int)($old['trainer_id'] ?? ($editing['trainer_id'] ?? 0));
+                    foreach ($trainers as $t): 
+                  ?>
+                    <option value="<?= (int)$t['trainer_id'] ?>" <?= $selectedTrainer === (int)$t['trainer_id'] ? 'selected' : '' ?>>
+                      <?= View::e($t['full_name']) ?> (<?= View::e($t['specialization']) ?>)
+                    </option>
+                  <?php endforeach; ?>
+                </select>
+                <?php if (!empty($errors['trainer_id'])): ?>
+                  <span class="field-error-msg"><?= View::e($errors['trainer_id']) ?></span>
+                <?php endif; ?>
+
+              <?php elseif ($editing): ?>
+                <!-- Trainer editing existing class: show current coach as locked read-only -->
+                <div class="form-control-readonly" style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:.5rem; padding:.6rem .9rem; display:flex; align-items:center; gap:.5rem;">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                  <span style="color:#334155; font-weight:600;"><?= View::e($editing['trainer_name']) ?></span>
+                  <span style="color:#94a3b8; font-size:.8rem;">(<?= View::e($editing['trainer_specialization']) ?>)</span>
+                  <input type="hidden" name="trainer_id" value="<?= (int)$editing['trainer_id'] ?>">
+                </div>
+                <span class="field-error-msg" style="color:#f97316; font-size:.75rem;">Only Admin can reassign the coach for this class.</span>
+
+              <?php else: ?>
+                <!-- Trainer creating new class: allow selecting a trainer -->
+                <select name="trainer_id" id="class-trainer" class="form-control<?= !empty($errors['trainer_id']) ? ' is-invalid' : '' ?>" required>
+                  <option value="">-- Select Trainer --</option>
+                  <?php 
+                    $selectedTrainer = (int)($old['trainer_id'] ?? 0);
+                    foreach ($trainers as $t): 
+                  ?>
+                    <option value="<?= (int)$t['trainer_id'] ?>" <?= $selectedTrainer === (int)$t['trainer_id'] ? 'selected' : '' ?>>
+                      <?= View::e($t['full_name']) ?> (<?= View::e($t['specialization']) ?>)
+                    </option>
+                  <?php endforeach; ?>
+                </select>
+                <?php if (!empty($errors['trainer_id'])): ?>
+                  <span class="field-error-msg"><?= View::e($errors['trainer_id']) ?></span>
+                <?php endif; ?>
               <?php endif; ?>
             </div>
 
@@ -233,6 +290,14 @@ $canManage = $user && in_array($user['role'], ['admin', 'trainer'], true);
                 <span class="field-error-msg"><?= View::e($errors['capacity']) ?></span>
               <?php endif; ?>
             </div>
+
+            <!-- Role-based permission notice -->
+            <?php if (!$isAdmin && $editing): ?>
+              <div class="form-notice-box" style="background:#fff7ed; border:1px solid #fed7aa; border-radius:.5rem; padding:.7rem 1rem; margin-bottom:1rem; font-size:.82rem; color:#9a3412; display:flex; gap:.5rem; align-items:flex-start;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0; margin-top:.1rem;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                <span>As a <strong>Trainer</strong>, you can update the class name, schedule &amp; capacity. To reassign the coach, please contact an <strong>Admin</strong>.</span>
+              </div>
+            <?php endif; ?>
 
             <div class="form-actions-row">
               <button type="submit" class="btn-orange-pill">

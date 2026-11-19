@@ -12,7 +12,7 @@ $base        = $baseUrl ?? '/online-gym/public';
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title><?= View::e($title ?? 'BraVaa Fitness — Online Gym Class Booking') ?></title>
+  <title><?= View::e($title ?? 'BraGym Fitness — Online Gym Class Booking') ?></title>
   
   <!-- Modern Inter typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -28,7 +28,7 @@ $base        = $baseUrl ?? '/online-gym/public';
 <header class="navbar" id="main-nav">
   <div class="nav-container">
     <a href="<?= View::e($base) ?>/" class="brand-logo">
-      <span class="logo-text">Bra<span class="logo-accent">Vaa</span></span>
+      <span class="logo-text">Bra<span class="logo-accent">Gym</span></span>
       <span class="logo-sub">FITNESS</span>
     </a>
 

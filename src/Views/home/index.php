@@ -148,7 +148,7 @@ $base = $baseUrl ?? '/online-gym/public';
         </div>
         <div class="quick-bar-text">
           <span class="quick-title">Location</span>
-          <span class="quick-subtitle">Kigali City Hub &bull; 05:00 - 22:00</span>
+          <span class="quick-subtitle">Huye Hub &bull; 05:00 - 22:00</span>
         </div>
       </div>
 
