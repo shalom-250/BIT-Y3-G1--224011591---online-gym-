@@ -13,9 +13,36 @@
 
 ## 1. Project Overview & Scope
 BraVaa Fitness is a high-performance web application engineered for modern gym management. 
-- **Members:** Browse scheduled fitness programs, inspect real-time capacity and trainer credentials, reserve session slots, and manage reservations.
-- **Trainers:** Monitor their class schedules, manage assigned sessions, and track member attendance.
-- **Administrators:** Full CRUD management across all system entities: Users, Trainers, Classes, and Bookings.
+- **Members:** Browse scheduled fitness programs, inspect real-time capacity and trainer credentials, reserve session slots, and cancel their own reservations.
+- **Trainers:** View only the bookings for their own assigned classes, mark members as attended — cannot cancel bookings or delete classes.
+- **Administrators:** Full CRUD management across all system entities: Users, Trainers, Classes, and Bookings, including coach assignment and all cancellations.
+
+The user interface follows a modern design inspired by the **BraVaa Fitness** aesthetic: a deep slate navy hero section (`#141c2e`) with high-contrast radiant orange accents (`#f97316`) and cyan highlights (`#38bdf8`), seamlessly transitioning into light, accessible, clean content cards and dashboards for entity management.
+
+---
+
+## 1b. Role-Based Access Control (RBAC)
+
+| Feature / Action | 👑 Admin | 🏋️ Trainer | 👤 Member |
+|---|:---:|:---:|:---:|
+| View all classes | ✅ | ✅ | ✅ |
+| Create new class | ✅ | ✅ | ❌ |
+| Edit class (name, schedule, capacity) | ✅ | ✅ | ❌ |
+| **Assign/reassign trainer to class** | ✅ | ❌ | ❌ |
+| **Delete a class** | ✅ | ❌ | ❌ |
+| View bookings | All bookings | Own-class bookings only | Own bookings only |
+| Mark booking as Attended | ✅ | ✅ (own classes) | ❌ |
+| **Cancel any booking** | ✅ | ❌ | ❌ |
+| Cancel own booking | ✅ | ❌ | ✅ (confirmed only) |
+| Delete booking record | ✅ | ❌ | ❌ |
+| Create/Edit/Delete users | ✅ | ❌ | ❌ |
+| Create/Edit/Delete trainers | ✅ | ❌ | ❌ |
+
+> **Key design decisions:**
+> - Trainers can see the roster for their own classes only — not bookings from other trainers' classes.
+> - Only Admin can cancel or delete a reservation.
+> - Only Admin can reassign which trainer/coach is assigned to a class.
+> - The `trainers` table includes a `user_id` FK column to link each trainer profile to their login account.
 
 The user interface follows a modern design inspired by the **BraVaa Fitness** aesthetic: a deep slate navy hero section (`#141c2e`) with high-contrast radiant orange accents (`#f97316`) and cyan highlights (`#38bdf8`), seamlessly transitioning into light, accessible, clean content cards and dashboards for entity management.
 
@@ -36,6 +63,7 @@ The database schema (`gym_db`) is normalized into **Third Normal Form (3NF)** wi
 
 2. **`trainers`** — Domain Entity 1 (Fitness Coaches)
    - `trainer_id` (INT, PK, AUTO_INCREMENT)
+   - `user_id` (INT, UNIQUE, FK → `users.user_id`, NULLABLE — links trainer profile to login account)
    - `full_name` (VARCHAR(100), NOT NULL)
    - `specialization` (VARCHAR(100), NOT NULL)
    - `phone` (VARCHAR(20), NOT NULL)

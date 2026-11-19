@@ -8,7 +8,7 @@ use PDO;
 final class Trainer {
     public static function find(int $id): ?array {
         $stmt = Database::pdo()->prepare(
-            'SELECT t.trainer_id, t.full_name, t.specialization, t.phone,
+            'SELECT t.trainer_id, t.user_id, t.full_name, t.specialization, t.phone,
                     COUNT(c.class_id) AS class_count
              FROM trainers t
              LEFT JOIN classes c ON c.trainer_id = t.trainer_id
@@ -17,6 +17,22 @@ final class Trainer {
              LIMIT 1'
         );
         $stmt->execute(['id' => $id]);
+        $row = $stmt->fetch();
+        return $row ?: null;
+    }
+
+    /**
+     * Find the trainer profile linked to a specific user account.
+     * Returns null if the user has no linked trainer profile.
+     */
+    public static function findByUserId(int $userId): ?array {
+        $stmt = Database::pdo()->prepare(
+            'SELECT t.trainer_id, t.user_id, t.full_name, t.specialization, t.phone
+             FROM trainers t
+             WHERE t.user_id = :user_id
+             LIMIT 1'
+        );
+        $stmt->execute(['user_id' => $userId]);
         $row = $stmt->fetch();
         return $row ?: null;
     }

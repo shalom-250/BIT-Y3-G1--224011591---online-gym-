@@ -35,9 +35,13 @@ CREATE TABLE users (
 -- --------------------------------------------------------
 CREATE TABLE trainers (
     trainer_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT DEFAULT NULL UNIQUE,
     full_name VARCHAR(100) NOT NULL,
     specialization VARCHAR(100) NOT NULL,
-    phone VARCHAR(20) NOT NULL
+    phone VARCHAR(20) NOT NULL,
+    CONSTRAINT fk_trainer_user
+        FOREIGN KEY (user_id) REFERENCES users(user_id)
+        ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------

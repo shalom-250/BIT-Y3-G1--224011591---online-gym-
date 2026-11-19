@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Models\Booking;
 use App\Models\GymClass;
+use App\Models\Trainer;
 use App\Models\User;
 use App\Services\AuthGuard;
 use App\Services\BookingValidator;
@@ -25,10 +26,19 @@ final class BookingController {
         $editId  = (int)($_GET['edit'] ?? 0);
         $editing = $editId > 0 ? Booking::find($editId) : null;
 
-        if ($user['role'] === 'member') {
-            $bookings = Booking::forMember((int)$user['user_id']);
-        } else {
+        // ── Scope bookings by role ──────────────────────────────────────
+        // Admin  → all bookings in the system
+        // Trainer → only bookings for classes they teach (via trainers.user_id)
+        // Member  → only their own bookings
+        if ($user['role'] === 'admin') {
             $bookings = Booking::all();
+        } elseif ($user['role'] === 'trainer') {
+            $trainerProfile = Trainer::findByUserId((int)$user['user_id']);
+            $bookings = $trainerProfile
+                ? Booking::forTrainerClasses((int)$trainerProfile['trainer_id'])
+                : [];
+        } else {
+            $bookings = Booking::forMember((int)$user['user_id']);
         }
 
         $allClasses = GymClass::all();
@@ -36,7 +46,7 @@ final class BookingController {
         $counts     = Booking::counts();
 
         View::render('bookings/index', [
-            'title'         => 'Class Bookings — BraVaa Gym',
+            'title'         => 'Class Bookings – BraVaa Gym',
             'baseUrl'       => self::BASE,
             'flash'         => $flash,
             'errors'        => $errors,
@@ -133,7 +143,7 @@ final class BookingController {
     }
 
     public function updateStatus(): void {
-        AuthGuard::requireRole(['admin', 'trainer', 'member'], '/bookings');
+        AuthGuard::requireLogin('/login');
         $user = AuthGuard::user();
 
         if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
@@ -159,7 +169,10 @@ final class BookingController {
             exit;
         }
 
-        // If member, ensure they own the booking and can only cancel
+        // ── Permission rules ───────────────────────────────────────────
+        // Admin   → can set any status on any booking
+        // Trainer → can mark 'attended' ONLY on bookings for their own classes; CANNOT cancel
+        // Member  → can cancel ONLY their own confirmed bookings; no other status changes
         if ($user['role'] === 'member') {
             if ((int)$booking['member_id'] !== (int)$user['user_id']) {
                 Flash::set('error', 'You are not authorized to modify this booking.');
@@ -167,11 +180,33 @@ final class BookingController {
                 exit;
             }
             if ($status !== 'cancelled') {
-                Flash::set('error', 'Members can only cancel their bookings.');
+                Flash::set('error', 'Members can only cancel their own bookings.');
+                header('Location: ' . self::BASE . '/bookings', true, 303);
+                exit;
+            }
+        } elseif ($user['role'] === 'trainer') {
+            // Trainer can only mark 'attended' — cancellation is admin-only
+            if ($status === 'cancelled') {
+                Flash::set('error', 'Trainers cannot cancel bookings. Only Admin can cancel reservations.');
+                header('Location: ' . self::BASE . '/bookings', true, 303);
+                exit;
+            }
+            // Verify this booking belongs to one of the trainer's own classes
+            $trainerProfile = Trainer::findByUserId((int)$user['user_id']);
+            if (!$trainerProfile) {
+                Flash::set('error', 'No trainer profile found for your account. Please contact Admin.');
+                header('Location: ' . self::BASE . '/bookings', true, 303);
+                exit;
+            }
+            // Load the class to confirm it belongs to this trainer
+            $gymClass = GymClass::find((int)$booking['class_id']);
+            if (!$gymClass || (int)$gymClass['trainer_id'] !== (int)$trainerProfile['trainer_id']) {
+                Flash::set('error', 'You can only update attendance for bookings in your own classes.');
                 header('Location: ' . self::BASE . '/bookings', true, 303);
                 exit;
             }
         }
+        // Admin: no restrictions — falls through
 
         try {
             Booking::updateStatus($id, $status);
@@ -185,8 +220,8 @@ final class BookingController {
     }
 
     public function delete(): void {
-        AuthGuard::requireRole(['admin', 'member'], '/bookings');
-        $user = AuthGuard::user();
+        // Only admin can permanently delete bookings
+        AuthGuard::requireRole(['admin'], '/bookings');
 
         if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
             http_response_code(405);
@@ -195,18 +230,11 @@ final class BookingController {
 
         Csrf::validateOrAbort(self::BASE . '/bookings');
 
-        $id = (int)($_POST['id'] ?? 0);
+        $id      = (int)($_POST['id'] ?? 0);
         $booking = Booking::find($id);
 
         if (!$booking) {
             Flash::set('error', 'Booking record not found.');
-            header('Location: ' . self::BASE . '/bookings', true, 303);
-            exit;
-        }
-
-        // Member check
-        if ($user['role'] === 'member' && (int)$booking['member_id'] !== (int)$user['user_id']) {
-            Flash::set('error', 'You cannot delete another member\'s booking.');
             header('Location: ' . self::BASE . '/bookings', true, 303);
             exit;
         }

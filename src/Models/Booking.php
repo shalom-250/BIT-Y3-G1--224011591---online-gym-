@@ -39,6 +39,27 @@ final class Booking {
         return $stmt->fetchAll();
     }
 
+    /**
+     * All bookings for classes that belong to a specific trainer.
+     * Used by trainer role so they only see their own class rosters.
+     */
+    public static function forTrainerClasses(int $trainerId): array {
+        $stmt = Database::pdo()->prepare(
+            'SELECT b.booking_id, b.class_id, b.member_id, b.booked_at, b.status,
+                    c.name AS class_name, c.schedule_time, c.capacity,
+                    t.full_name AS trainer_name, t.specialization AS trainer_specialization,
+                    u.username AS member_username, u.email AS member_email
+             FROM bookings b
+             INNER JOIN classes c ON c.class_id = b.class_id
+             INNER JOIN trainers t ON t.trainer_id = c.trainer_id
+             INNER JOIN users u ON u.user_id = b.member_id
+             WHERE c.trainer_id = :trainer_id
+             ORDER BY b.booking_id DESC'
+        );
+        $stmt->execute(['trainer_id' => $trainerId]);
+        return $stmt->fetchAll();
+    }
+
     public static function forMember(int $memberId): array {
         $stmt = Database::pdo()->prepare(
             'SELECT b.booking_id, b.class_id, b.member_id, b.booked_at, b.status,

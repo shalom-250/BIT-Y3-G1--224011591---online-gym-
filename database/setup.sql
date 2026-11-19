@@ -1,6 +1,6 @@
 -- ========================================================
 -- Online Gym Class Booking System (BraVaa Fitness)
--- Complete Database Setup (Schema + Seed)
+-- Database Schema (3NF Compliant)
 -- Student: NIYONKURU SHALOM (Reg. No: 224011591)
 -- ========================================================
 
@@ -15,7 +15,9 @@ DROP TABLE IF EXISTS users;
 SET FOREIGN_KEY_CHECKS = 1;
 
 -- --------------------------------------------------------
--- 1. Table: users
+-- Table 1: users
+-- 3NF: Primary key user_id uniquely identifies each user.
+-- No partial dependencies, no transitive dependencies.
 -- --------------------------------------------------------
 CREATE TABLE users (
     user_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -27,17 +29,25 @@ CREATE TABLE users (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
--- 2. Table: trainers
+-- Table 2: trainers
+-- 3NF: Primary key trainer_id uniquely identifies each trainer.
+-- Attributes full_name, specialization, phone depend solely on trainer_id.
 -- --------------------------------------------------------
 CREATE TABLE trainers (
     trainer_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT DEFAULT NULL UNIQUE,
     full_name VARCHAR(100) NOT NULL,
     specialization VARCHAR(100) NOT NULL,
-    phone VARCHAR(20) NOT NULL
+    phone VARCHAR(20) NOT NULL,
+    CONSTRAINT fk_trainer_user
+        FOREIGN KEY (user_id) REFERENCES users(user_id)
+        ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
--- 3. Table: classes
+-- Table 3: classes
+-- 3NF: Primary key class_id uniquely identifies each class.
+-- trainer_id is a foreign key referencing trainers(trainer_id).
 -- --------------------------------------------------------
 CREATE TABLE classes (
     class_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -51,7 +61,11 @@ CREATE TABLE classes (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
--- 4. Table: bookings
+-- Table 4: bookings
+-- 3NF: Primary key booking_id.
+-- class_id references classes(class_id).
+-- member_id references users(user_id).
+-- Unique constraint prevents duplicate bookings for same member and class.
 -- --------------------------------------------------------
 CREATE TABLE bookings (
     booking_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -67,12 +81,17 @@ CREATE TABLE bookings (
         ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT uq_member_class_booking UNIQUE (class_id, member_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
 -- ========================================================
+-- Online Gym Class Booking System (BraVaa Fitness)
 -- Seed Data
 -- ========================================================
 
--- Users (All default passwords: password123)
+USE gym_db;
+
+-- --------------------------------------------------------
+-- 1. Seed Users (Default password for all users: password123)
+-- Hash generated via password_hash('password123', PASSWORD_BCRYPT)
+-- --------------------------------------------------------
 INSERT INTO users (user_id, username, email, password_hash, role, created_at) VALUES
 (1, 'admin', 'admin@bravaagym.com', '$2y$10$CoEYzmnotNCVoubK79oUOuXn4.si3JWgAZUWbLtjd0sofhYeX8gw2', 'admin', '2026-01-10 08:00:00'),
 (2, 'marcus_coach', 'marcus.vance@bravaagym.com', '$2y$10$CoEYzmnotNCVoubK79oUOuXn4.si3JWgAZUWbLtjd0sofhYeX8gw2', 'trainer', '2026-01-11 09:30:00'),
@@ -83,15 +102,19 @@ INSERT INTO users (user_id, username, email, password_hash, role, created_at) VA
 (7, 'kevin_mugisha', 'kevin.mugisha@gmail.com', '$2y$10$CoEYzmnotNCVoubK79oUOuXn4.si3JWgAZUWbLtjd0sofhYeX8gw2', 'member', '2026-02-03 16:45:00'),
 (8, 'claire_ineza', 'claire.ineza@yahoo.com', '$2y$10$CoEYzmnotNCVoubK79oUOuXn4.si3JWgAZUWbLtjd0sofhYeX8gw2', 'member', '2026-02-04 17:20:00');
 
--- Trainers
-INSERT INTO trainers (trainer_id, full_name, specialization, phone) VALUES
-(1, 'Marcus Vance', 'CrossFit & Battle Rope Conditioning', '+250 788 111 222'),
-(2, 'Elena Rostova', 'Power Yoga & Core Flexibility', '+250 788 333 444'),
-(3, 'David Kimenyi', 'Olympic Weightlifting & Strength', '+250 788 555 666'),
-(4, 'Sarah Jenkins', 'HIIT & Cardiovascular Endurance', '+250 788 777 888'),
-(5, 'Patrick Mugabo', 'Boxing & Functional Mobility', '+250 788 999 000');
+-- --------------------------------------------------------
+-- 2. Seed Trainers (Domain Entity)
+-- --------------------------------------------------------
+INSERT INTO trainers (trainer_id, user_id, full_name, specialization, phone) VALUES
+(1, 2, 'Marcus Vance', 'CrossFit & Battle Rope Conditioning', '+250 788 111 222'),
+(2, 3, 'Elena Rostova', 'Power Yoga & Core Flexibility', '+250 788 333 444'),
+(3, 4, 'David Kimenyi', 'Olympic Weightlifting & Strength', '+250 788 555 666'),
+(4, NULL, 'Sarah Jenkins', 'HIIT & Cardiovascular Endurance', '+250 788 777 888'),
+(5, NULL, 'Patrick Mugabo', 'Boxing & Functional Mobility', '+250 788 999 000');
 
--- Classes
+-- --------------------------------------------------------
+-- 3. Seed Classes (Domain Entity)
+-- --------------------------------------------------------
 INSERT INTO classes (class_id, name, trainer_id, schedule_time, capacity) VALUES
 (1, 'High-Intensity Battle Ropes & Cardio Blast', 1, '2026-11-25 07:00:00', 15),
 (2, 'Morning Power Vinyasa Yoga', 2, '2026-11-25 08:30:00', 20),
@@ -102,7 +125,9 @@ INSERT INTO classes (class_id, name, trainer_id, schedule_time, capacity) VALUES
 (7, 'Advanced Kettlebell & Tactical Strength', 1, '2026-11-27 16:30:00', 12),
 (8, 'Weekend Sunset Mobility & Recovery', 2, '2026-11-28 17:30:00', 25);
 
--- Bookings
+-- --------------------------------------------------------
+-- 4. Seed Bookings (Domain Entity)
+-- --------------------------------------------------------
 INSERT INTO bookings (booking_id, class_id, member_id, booked_at, status) VALUES
 (1, 1, 5, '2026-11-19 09:15:00', 'confirmed'),
 (2, 2, 5, '2026-11-19 10:00:00', 'confirmed'),
