@@ -45,11 +45,10 @@ $canManage = $user && in_array($user['role'], ['admin', 'trainer'], true);
           <table class="data-table" id="classes-table">
             <thead>
               <tr>
-                <th>Class Name</th>
-                <th>Coach / Specialization</th>
-                <th>Schedule Date &amp; Time</th>
-                <th>Capacity</th>
-                <th>Action</th>
+                <th style="width: 38%;">Class &amp; Coach</th>
+                <th style="width: 24%;">Schedule</th>
+                <th style="width: 22%;">Capacity</th>
+                <th style="width: 16%; text-align: right;">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -68,22 +67,21 @@ $canManage = $user && in_array($user['role'], ['admin', 'trainer'], true);
                           <span class="badge-status badge-warning" style="font-size: 0.65rem; margin-left: 0.3rem;">Editing Now</span>
                         <?php endif; ?>
                       </div>
-                      <span class="text-xs text-muted">ID: #<?= (int)$c['class_id'] ?></span>
-                    </td>
-                    <td>
-                      <div class="table-primary-text"><?= View::e($c['trainer_name']) ?></div>
-                      <span class="text-xs text-muted"><?= View::e($c['trainer_specialization']) ?></span>
+                      <div class="class-instructor-meta">
+                        <span class="text-xs text-muted">Coach: <strong><?= View::e($c['trainer_name']) ?></strong> &bull; <?= View::e($c['trainer_specialization']) ?></span>
+                        <span class="text-xs text-muted">&bull; ID: #<?= (int)$c['class_id'] ?></span>
+                      </div>
                     </td>
                     <td>
                       <div class="schedule-pill">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
                         <span><?= View::formatDateTime((string)$c['schedule_time']) ?></span>
                       </div>
                     </td>
                     <td>
                       <div class="capacity-cell">
                         <div class="capacity-numbers">
-                          <strong><?= (int)$c['booked_count'] ?> / <?= (int)$c['capacity'] ?></strong>
+                          <strong><?= (int)$c['booked_count'] ?>/<?= (int)$c['capacity'] ?></strong>
                           <?php if ($c['is_full']): ?>
                             <span class="badge-status badge-danger">FULL</span>
                           <?php else: ?>
@@ -95,12 +93,12 @@ $canManage = $user && in_array($user['role'], ['admin', 'trainer'], true);
                         </div>
                       </div>
                     </td>
-                    <td>
-                      <div class="table-actions-cell">
+                    <td style="text-align: right;">
+                      <div class="table-actions-cell" style="justify-content: flex-end;">
                         <?php if ($canManage): ?>
                           <!-- Edit Button -->
                           <a href="<?= View::e($base) ?>/classes?edit=<?= (int)$c['class_id'] ?>#class-form-card" class="btn-action btn-action-edit" title="Edit Class">
-                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                             <span>Edit</span>
                           </a>
 
@@ -109,7 +107,7 @@ $canManage = $user && in_array($user['role'], ['admin', 'trainer'], true);
                             <?= Csrf::field() ?>
                             <input type="hidden" name="id" value="<?= (int)$c['class_id'] ?>">
                             <button type="submit" class="btn-action btn-action-delete" title="Delete Class">
-                              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                             </button>
                           </form>
                         <?php endif; ?>
@@ -124,11 +122,11 @@ $canManage = $user && in_array($user['role'], ['admin', 'trainer'], true);
                             <form action="<?= View::e($base) ?>/bookings/book" method="POST" class="d-inline">
                               <?= Csrf::field() ?>
                               <input type="hidden" name="class_id" value="<?= (int)$c['class_id'] ?>">
-                              <button type="submit" class="btn-table-book">Book Spot</button>
+                              <button type="submit" class="btn-table-book">Book</button>
                             </form>
                           <?php endif; ?>
                         <?php elseif (!$user): ?>
-                          <a href="<?= View::e($base) ?>/login" class="btn-table-book">Sign in to book</a>
+                          <a href="<?= View::e($base) ?>/login" class="btn-table-book">Sign in</a>
                         <?php endif; ?>
                       </div>
                     </td>
@@ -136,7 +134,7 @@ $canManage = $user && in_array($user['role'], ['admin', 'trainer'], true);
                 <?php endforeach; ?>
               <?php else: ?>
                 <tr>
-                  <td colspan="5" class="table-empty">No fitness classes currently scheduled.</td>
+                  <td colspan="4" class="table-empty">No fitness classes currently scheduled.</td>
                 </tr>
               <?php endif; ?>
             </tbody>

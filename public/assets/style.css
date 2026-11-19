@@ -1254,15 +1254,15 @@ button, input, select, textarea {
 
 .table-responsive {
   width: 100%;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
+  overflow-x: hidden; /* No horizontal scrollbar */
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
 }
 
 .data-table {
   width: 100%;
   border-collapse: collapse;
   text-align: left;
-  min-width: 540px;
+  table-layout: auto;
 }
 
 .data-table th {
@@ -1272,17 +1272,26 @@ button, input, select, textarea {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  padding: 0.75rem 1rem;
+  padding: 0.75rem 0.85rem;
   border-bottom: 1px solid var(--color-border);
-  white-space: nowrap;
 }
 
 .data-table td {
-  padding: 0.85rem 1rem;
+  padding: 0.8rem 0.85rem;
   border-bottom: 1px solid var(--color-border-subtle);
-  font-size: 0.88rem;
+  font-size: 0.875rem;
   color: var(--color-text-main);
   vertical-align: middle;
+  word-break: break-word;
+}
+
+.class-instructor-meta {
+  margin-top: 0.25rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  line-height: 1.35;
 }
 
 .data-table tbody tr {
@@ -1300,6 +1309,7 @@ button, input, select, textarea {
 .table-primary-text {
   color: var(--color-text-main);
   font-size: 0.9rem;
+  line-height: 1.3;
 }
 
 .font-bold {
@@ -1321,11 +1331,11 @@ button, input, select, textarea {
 .schedule-pill {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.35rem;
   background: #f1f5f9;
-  padding: 0.3rem 0.65rem;
+  padding: 0.3rem 0.55rem;
   border-radius: var(--radius-xs);
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   font-weight: 600;
   color: var(--color-text-main);
 }
@@ -1337,21 +1347,22 @@ button, input, select, textarea {
 }
 
 .capacity-cell {
-  min-width: 140px;
+  width: 100%;
+  max-width: 130px;
 }
 
 .capacity-numbers {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 0.8rem;
-  gap: 0.5rem;
+  font-size: 0.78rem;
+  gap: 0.35rem;
 }
 
 .table-actions-cell {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.4rem;
   white-space: nowrap;
 }
 
@@ -2122,12 +2133,37 @@ button, input, select, textarea {
     padding: 1.25rem 1rem;
   }
 
-  .data-table th, .data-table td {
-    padding: 0.7rem 0.75rem;
-    font-size: 0.825rem;
+  /* Responsive Mobile Card View for Tables - 0% horizontal scroll */
+  .data-table thead {
+    display: none;
+  }
+
+  .data-table, .data-table tbody, .data-table tr, .data-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .data-table tr {
+    padding: 1rem;
+    border-bottom: 1px solid var(--color-border);
+    background: #ffffff;
+  }
+
+  .data-table td {
+    padding: 0.35rem 0;
+    border: none;
   }
 
   .capacity-cell {
-    min-width: 110px;
+    width: 100%;
+    max-width: 100%;
+    margin-top: 0.25rem;
+  }
+
+  .table-actions-cell {
+    margin-top: 0.75rem;
+    padding-top: 0.5rem;
+    border-top: 1px dashed var(--color-border);
+    justify-content: flex-start !important;
   }
 }
