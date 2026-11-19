@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Models\GymClass;
 use App\Models\Trainer;
 use App\Models\Booking;
+use App\Models\User;
 use App\Services\AuthGuard;
 use App\Support\Flash;
 use App\Support\View;
@@ -22,6 +23,7 @@ final class HomeController {
         $classCount      = GymClass::count();
         $trainerCount    = Trainer::count();
         $bookingCounts   = Booking::counts();
+        $userCounts      = User::counts();
 
         // If logged in as member, check which classes they have already booked
         $userBookedClassIds = [];
@@ -43,6 +45,7 @@ final class HomeController {
             'trainers'           => $trainers,
             'classCount'         => $classCount,
             'trainerCount'       => $trainerCount,
+            'memberCount'        => $userCounts['member'] ?? 0,
             'totalBookings'      => $bookingCounts['total'] ?? 0,
             'userBookedClassIds' => $userBookedClassIds,
         ]);

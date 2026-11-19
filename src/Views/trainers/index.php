@@ -37,7 +37,7 @@ $isAdmin = $user && $user['role'] === 'admin';
             <h3 class="card-title">Staff Directory (<?= count($trainers) ?> Coaches)</h3>
             <span class="card-sub"><?= $isAdmin ? 'Admin CRUD Roster Controls' : 'Certified Training Faculty' ?></span>
           </div>
-          <span class="badge-tag">3NF: `trainers` table</span>
+          <span class="badge-tag">trainers table</span>
         </div>
 
         <div class="table-responsive">

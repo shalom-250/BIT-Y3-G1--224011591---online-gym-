@@ -54,7 +54,7 @@ $base = $baseUrl ?? '/online-gym/public';
             <h3 class="card-title">User Accounts (<?= count($users) ?>)</h3>
             <span class="card-sub">Secure BCRYPT Authentication &amp; RBAC</span>
           </div>
-          <span class="badge-tag">3NF: `users` table</span>
+          <span class="badge-tag">users table</span>
         </div>
 
         <div class="table-responsive">

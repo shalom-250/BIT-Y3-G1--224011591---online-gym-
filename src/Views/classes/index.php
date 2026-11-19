@@ -38,7 +38,7 @@ $canManage = $user && in_array($user['role'], ['admin', 'trainer'], true);
             <h3 class="card-title">Available Classes (<?= count($classes) ?>)</h3>
             <span class="card-sub"><?= $canManage ? 'Full Admin & Trainer Schedule Controls' : 'Instant Reservation System' ?></span>
           </div>
-          <span class="badge-tag">3NF: `classes` table</span>
+          <span class="badge-tag">classes table</span>
         </div>
 
         <div class="table-responsive">
@@ -126,7 +126,7 @@ $canManage = $user && in_array($user['role'], ['admin', 'trainer'], true);
                             </form>
                           <?php endif; ?>
                         <?php elseif (!$user): ?>
-                          <a href="<?= View::e($base) ?>/login" class="btn-table-book">Sign in</a>
+                          <a href="<?= View::e($base) ?>/login" class="btn-table-book">Book Gym Class</a>
                         <?php endif; ?>
                       </div>
                     </td>

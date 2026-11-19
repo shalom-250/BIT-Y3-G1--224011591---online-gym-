@@ -28,15 +28,15 @@ $base = $baseUrl ?? '/online-gym/public';
 
       <div class="hero-stats">
         <div class="stat-item">
-          <div class="stat-number">140+</div>
+          <div class="stat-number"><?= (int)$trainerCount ?>+</div>
           <div class="stat-label">EXPERT COACHS</div>
         </div>
         <div class="stat-item">
-          <div class="stat-number">978+</div>
+          <div class="stat-number"><?= (int)$memberCount ?>+</div>
           <div class="stat-label">MEMBERS JOINED</div>
         </div>
         <div class="stat-item">
-          <div class="stat-number">50+</div>
+          <div class="stat-number"><?= (int)$classCount ?>+</div>
           <div class="stat-label">FITNESS PROGRAMS</div>
         </div>
       </div>

@@ -4,7 +4,8 @@
 **Registration Number:** 224011591  
 **Group:** BIT Year 3 — Group 1  
 **Project Title:** Online Gym Class Booking  
-**GitHub Repository Name:** `BIT-Y3-G1-224011591-OnlineGymClassBooking`  
+**GitHub Repository:** `BIT-Y3-G1--224011591---online-gym-`  
+**Repository URL:** `https://github.com/shalom-250/BIT-Y3-G1--224011591---online-gym-.git`  
 **GitHub Collaborator Added:** `bemmy2005`  
 **Tech Stack:** Pure Vanilla PHP 8.2+ &bull; MySQL (InnoDB / 3NF) &bull; Vanilla JavaScript (Fetch API / DOM) &bull; Responsive CSS3 (No Frameworks)
 

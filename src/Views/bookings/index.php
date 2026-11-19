@@ -61,7 +61,7 @@ $isMember = $user && $user['role'] === 'member';
             <h3 class="card-title"><?= $isMember ? 'Your Scheduled Classes (' . count($bookings) . ')' : 'All Gym Reservations (' . count($bookings) . ')' ?></h3>
             <span class="card-sub"><?= $isMember ? 'Real-time check-in status' : 'Admin & Coach Reservation Roster' ?></span>
           </div>
-          <span class="badge-tag">3NF: `bookings` table</span>
+          <span class="badge-tag">bookings table</span>
         </div>
 
         <div class="table-responsive">
