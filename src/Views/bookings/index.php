@@ -51,7 +51,7 @@ $isMember  = $user && $user['role'] === 'member';
   <div class="stats-pills-row">
     <div class="stat-pill-card">
       <span class="stat-pill-num"><?= (int)($counts['total'] ?? count($bookings)) ?></span>
-      <span class="stat-pill-label"><?= $isTrainer ? 'Class Enrolments' : 'Total Reservations' ?></span>
+      <span class="stat-pill-label"><?= $isTrainer ? 'Class Enrolments' : ($isMember ? 'My Reservations' : 'Total Reservations') ?></span>
     </div>
     <div class="stat-pill-card stat-confirmed">
       <span class="stat-pill-num"><?= (int)($counts['confirmed'] ?? 0) ?></span>

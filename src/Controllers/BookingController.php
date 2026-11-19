@@ -26,24 +26,31 @@ final class BookingController {
         $editId  = (int)($_GET['edit'] ?? 0);
         $editing = $editId > 0 ? Booking::find($editId) : null;
 
-        // ── Scope bookings by role ──────────────────────────────────────
-        // Admin  → all bookings in the system
+        // ── Scope bookings and KPI counts by role ─────────────────────
+        // Admin   → all bookings in the system
         // Trainer → only bookings for classes they teach (via trainers.user_id)
         // Member  → only their own bookings
         if ($user['role'] === 'admin') {
             $bookings = Booking::all();
+            $counts   = Booking::counts();
         } elseif ($user['role'] === 'trainer') {
             $trainerProfile = Trainer::findByUserId((int)$user['user_id']);
-            $bookings = $trainerProfile
-                ? Booking::forTrainerClasses((int)$trainerProfile['trainer_id'])
-                : [];
+            if ($trainerProfile) {
+                $trainerId = (int)$trainerProfile['trainer_id'];
+                $bookings  = Booking::forTrainerClasses($trainerId);
+                $counts    = Booking::countsForTrainer($trainerId);
+            } else {
+                $bookings = [];
+                $counts   = ['confirmed' => 0, 'attended' => 0, 'cancelled' => 0, 'total' => 0];
+            }
         } else {
-            $bookings = Booking::forMember((int)$user['user_id']);
+            $memberId = (int)$user['user_id'];
+            $bookings = Booking::forMember($memberId);
+            $counts   = Booking::countsForMember($memberId);
         }
 
         $allClasses = GymClass::all();
         $allUsers   = User::all();
-        $counts     = Booking::counts();
 
         View::render('bookings/index', [
             'title'         => 'Class Bookings – BraVaa Gym',

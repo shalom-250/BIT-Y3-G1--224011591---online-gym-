@@ -154,4 +154,34 @@ final class Booking {
         }
         return $counts;
     }
+
+    public static function countsForMember(int $memberId): array {
+        $stmt = Database::pdo()->prepare(
+            'SELECT status, COUNT(*) AS count FROM bookings WHERE member_id = :member_id GROUP BY status'
+        );
+        $stmt->execute(['member_id' => $memberId]);
+        $counts = ['confirmed' => 0, 'attended' => 0, 'cancelled' => 0, 'total' => 0];
+        foreach ($stmt->fetchAll() as $row) {
+            $counts[$row['status']] = (int)$row['count'];
+            $counts['total'] += (int)$row['count'];
+        }
+        return $counts;
+    }
+
+    public static function countsForTrainer(int $trainerId): array {
+        $stmt = Database::pdo()->prepare(
+            'SELECT b.status, COUNT(*) AS count 
+             FROM bookings b
+             INNER JOIN classes c ON c.class_id = b.class_id
+             WHERE c.trainer_id = :trainer_id 
+             GROUP BY b.status'
+        );
+        $stmt->execute(['trainer_id' => $trainerId]);
+        $counts = ['confirmed' => 0, 'attended' => 0, 'cancelled' => 0, 'total' => 0];
+        foreach ($stmt->fetchAll() as $row) {
+            $counts[$row['status']] = (int)$row['count'];
+            $counts['total'] += (int)$row['count'];
+        }
+        return $counts;
+    }
 }
