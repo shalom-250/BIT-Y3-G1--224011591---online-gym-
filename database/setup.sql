@@ -35,13 +35,9 @@ CREATE TABLE users (
 -- --------------------------------------------------------
 CREATE TABLE trainers (
     trainer_id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT DEFAULT NULL UNIQUE,
     full_name VARCHAR(100) NOT NULL,
     specialization VARCHAR(100) NOT NULL,
-    phone VARCHAR(20) NOT NULL,
-    CONSTRAINT fk_trainer_user
-        FOREIGN KEY (user_id) REFERENCES users(user_id)
-        ON DELETE SET NULL ON UPDATE CASCADE
+    phone VARCHAR(20) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -105,12 +101,12 @@ INSERT INTO users (user_id, username, email, password_hash, role, created_at) VA
 -- --------------------------------------------------------
 -- 2. Seed Trainers (Domain Entity)
 -- --------------------------------------------------------
-INSERT INTO trainers (trainer_id, user_id, full_name, specialization, phone) VALUES
-(1, 2, 'Marcus Vance', 'CrossFit & Battle Rope Conditioning', '+250 788 111 222'),
-(2, 3, 'Elena Rostova', 'Power Yoga & Core Flexibility', '+250 788 333 444'),
-(3, 4, 'David Kimenyi', 'Olympic Weightlifting & Strength', '+250 788 555 666'),
-(4, NULL, 'Sarah Jenkins', 'HIIT & Cardiovascular Endurance', '+250 788 777 888'),
-(5, NULL, 'Patrick Mugabo', 'Boxing & Functional Mobility', '+250 788 999 000');
+INSERT INTO trainers (trainer_id, full_name, specialization, phone) VALUES
+(1, 'Marcus Vance', 'CrossFit & Battle Rope Conditioning', '+250 788 111 222'),
+(2, 'Elena Rostova', 'Power Yoga & Core Flexibility', '+250 788 333 444'),
+(3, 'David Kimenyi', 'Olympic Weightlifting & Strength', '+250 788 555 666'),
+(4, 'Sarah Jenkins', 'HIIT & Cardiovascular Endurance', '+250 788 777 888'),
+(5, 'Patrick Mugabo', 'Boxing & Functional Mobility', '+250 788 999 000');
 
 -- --------------------------------------------------------
 -- 3. Seed Classes (Domain Entity)

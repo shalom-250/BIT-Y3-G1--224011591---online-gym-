@@ -42,7 +42,7 @@ The user interface follows a modern design inspired by the **BraVaa Fitness** ae
 > - Trainers can see the roster for their own classes only — not bookings from other trainers' classes.
 > - Only Admin can cancel or delete a reservation.
 > - Only Admin can reassign which trainer/coach is assigned to a class.
-> - The `trainers` table includes a `user_id` FK column to link each trainer profile to their login account.
+> - Trainers manage their assigned classes and roster through seamless role authentication.
 
 The user interface follows a modern design inspired by the **BraVaa Fitness** aesthetic: a deep slate navy hero section (`#141c2e`) with high-contrast radiant orange accents (`#f97316`) and cyan highlights (`#38bdf8`), seamlessly transitioning into light, accessible, clean content cards and dashboards for entity management.
 
@@ -63,7 +63,6 @@ The database schema (`gym_db`) is normalized into **Third Normal Form (3NF)** wi
 
 2. **`trainers`** — Domain Entity 1 (Fitness Coaches)
    - `trainer_id` (INT, PK, AUTO_INCREMENT)
-   - `user_id` (INT, UNIQUE, FK → `users.user_id`, NULLABLE — links trainer profile to login account)
    - `full_name` (VARCHAR(100), NOT NULL)
    - `specialization` (VARCHAR(100), NOT NULL)
    - `phone` (VARCHAR(20), NOT NULL)

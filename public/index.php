@@ -83,7 +83,7 @@ if (!isset($routes[$path])) {
     <div class="card">
         <h1>404</h1>
         <p>The requested page <code>' . htmlspecialchars($path, ENT_QUOTES, 'UTF-8') . '</code> was not found.</p>
-        <p style="margin-top: 1.5rem;"><a href="' . htmlspecialchars($BASE ?: '/', ENT_QUOTES, 'UTF-8') . '">&larr; Return to BraVaa Fitness</a></p>
+        <p style="margin-top: 1.5rem;"><a href="' . htmlspecialchars($BASE ?: '/', ENT_QUOTES, 'UTF-8') . '">&larr; Return to BraGym Fitness</a></p>
     </div>
     </body></html>';
     exit;

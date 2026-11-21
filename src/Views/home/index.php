@@ -6,7 +6,7 @@ $base = $baseUrl ?? '/online-gym/public';
 ?>
 
 <!-- ========================================================
-     HERO SECTION (Replicating BraVaa Design from Image)
+     HERO SECTION (Replicating BraGym Design from Image)
      ======================================================== -->
 <section class="hero-section">
   <div class="hero-container">
@@ -138,7 +138,7 @@ $base = $baseUrl ?? '/online-gym/public';
     </div>
 
   </div>
-
+<br><br>
   <!-- Floating Quick Bar (From Image Bottom) -->
   <div class="hero-quick-bar-wrapper">
     <div class="quick-bar-card">

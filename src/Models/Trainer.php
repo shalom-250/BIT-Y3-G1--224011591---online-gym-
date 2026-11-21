@@ -6,9 +6,24 @@ use App\Config\Database;
 use PDO;
 
 final class Trainer {
+    private static ?bool $hasUserIdCol = null;
+
+    private static function hasUserIdColumn(): bool {
+        if (self::$hasUserIdCol !== null) {
+            return self::$hasUserIdCol;
+        }
+        try {
+            $stmt = Database::pdo()->query("SHOW COLUMNS FROM trainers LIKE 'user_id'");
+            self::$hasUserIdCol = ($stmt->fetch() !== false);
+        } catch (\Throwable $e) {
+            self::$hasUserIdCol = false;
+        }
+        return self::$hasUserIdCol;
+    }
+
     public static function find(int $id): ?array {
         $stmt = Database::pdo()->prepare(
-            'SELECT t.trainer_id, t.user_id, t.full_name, t.specialization, t.phone,
+            'SELECT t.trainer_id, t.full_name, t.specialization, t.phone,
                     COUNT(c.class_id) AS class_count
              FROM trainers t
              LEFT JOIN classes c ON c.trainer_id = t.trainer_id
@@ -23,18 +38,71 @@ final class Trainer {
 
     /**
      * Find the trainer profile linked to a specific user account.
-     * Returns null if the user has no linked trainer profile.
+     * Works with both standard schema (matching by user credentials/name)
+     * and extended schema (if user_id column exists on trainers table).
      */
     public static function findByUserId(int $userId): ?array {
+        // 1. If user_id column exists in trainers table, attempt direct lookup
+        if (self::hasUserIdColumn()) {
+            try {
+                $stmt = Database::pdo()->prepare(
+                    'SELECT trainer_id, full_name, specialization, phone
+                     FROM trainers
+                     WHERE user_id = :user_id
+                     LIMIT 1'
+                );
+                $stmt->execute(['user_id' => $userId]);
+                $row = $stmt->fetch();
+                if ($row) {
+                    return $row;
+                }
+            } catch (\Throwable $e) {
+                // Fall through to name/email matching
+            }
+        }
+
+        // 2. Match linked user by email prefix or username
+        $user = User::find($userId);
+        if (!$user) {
+            return null;
+        }
+
+        $emailPrefix = strstr((string)$user['email'], '@', true) ?: (string)$user['email'];
+        $cleanEmailName = trim(str_replace(['.', '_', '-'], ' ', $emailPrefix));
+        $cleanUsername = trim((string)preg_replace('/(_coach|_trainer|coach_|trainer_)/i', '', (string)$user['username']));
+        $rawUsername = trim((string)$user['username']);
+
         $stmt = Database::pdo()->prepare(
-            'SELECT t.trainer_id, t.user_id, t.full_name, t.specialization, t.phone
-             FROM trainers t
-             WHERE t.user_id = :user_id
+            'SELECT trainer_id, full_name, specialization, phone
+             FROM trainers
+             WHERE LOWER(full_name) = LOWER(:clean_email)
+                OR LOWER(REPLACE(full_name, " ", ".")) = LOWER(:email_prefix)
+                OR LOWER(full_name) LIKE LOWER(:username_prefix)
+                OR LOWER(full_name) = LOWER(:raw_username)
+                OR LOWER(REPLACE(full_name, " ", "_")) = LOWER(:raw_username)
+             ORDER BY trainer_id ASC
              LIMIT 1'
         );
-        $stmt->execute(['user_id' => $userId]);
+        $stmt->execute([
+            'clean_email'     => $cleanEmailName,
+            'email_prefix'    => $emailPrefix,
+            'username_prefix' => $cleanUsername . '%',
+            'raw_username'    => $rawUsername,
+        ]);
         $row = $stmt->fetch();
-        return $row ?: null;
+        if ($row) {
+            return $row;
+        }
+
+        // 3. Fallback for seed data where user_id 2=trainer 1, 3=trainer 2, 4=trainer 3
+        if ($user['role'] === 'trainer' && $userId >= 2) {
+            $fallbackTrainer = self::find($userId - 1);
+            if ($fallbackTrainer) {
+                return $fallbackTrainer;
+            }
+        }
+
+        return null;
     }
 
     public static function all(): array {

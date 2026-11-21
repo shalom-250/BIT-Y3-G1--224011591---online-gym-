@@ -7,7 +7,7 @@
       <!-- Col 1: Brand & Bio -->
       <div class="footer-col">
         <a href="<?= View::e($base) ?>/" class="brand-logo footer-logo">
-          <span class="logo-text">Bra<span class="logo-accent">Vaa</span></span>
+          <span class="logo-text">Bra<span class="logo-accent">Gym</span></span>
           <span class="logo-sub">FITNESS</span>
         </a>
         <p class="footer-desc">
