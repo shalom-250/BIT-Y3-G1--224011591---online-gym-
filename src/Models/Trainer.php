@@ -61,37 +61,33 @@ final class Trainer {
             }
         }
 
-        // 2. Match linked user by email prefix or username
+        // 2. Match linked user by email prefix or username using pure PHP comparison
+        // (Avoids PDO emulation placeholder repetition bugs across MySQL drivers)
         $user = User::find($userId);
         if (!$user) {
             return null;
         }
 
-        $emailPrefix = strstr((string)$user['email'], '@', true) ?: (string)$user['email'];
+        $emailPrefix    = strtolower(strstr((string)$user['email'], '@', true) ?: (string)$user['email']);
         $cleanEmailName = trim(str_replace(['.', '_', '-'], ' ', $emailPrefix));
-        $cleanUsername = trim((string)preg_replace('/(_coach|_trainer|coach_|trainer_)/i', '', (string)$user['username']));
-        $rawUsername = trim((string)$user['username']);
+        $cleanUsername  = strtolower(trim((string)preg_replace('/(_coach|_trainer|coach_|trainer_)/i', '', (string)$user['username'])));
+        $rawUsername    = strtolower(trim((string)$user['username']));
 
-        $stmt = Database::pdo()->prepare(
-            'SELECT trainer_id, full_name, specialization, phone
-             FROM trainers
-             WHERE LOWER(full_name) = LOWER(:clean_email)
-                OR LOWER(REPLACE(full_name, " ", ".")) = LOWER(:email_prefix)
-                OR LOWER(full_name) LIKE LOWER(:username_prefix)
-                OR LOWER(full_name) = LOWER(:raw_username)
-                OR LOWER(REPLACE(full_name, " ", "_")) = LOWER(:raw_username)
-             ORDER BY trainer_id ASC
-             LIMIT 1'
-        );
-        $stmt->execute([
-            'clean_email'     => $cleanEmailName,
-            'email_prefix'    => $emailPrefix,
-            'username_prefix' => $cleanUsername . '%',
-            'raw_username'    => $rawUsername,
-        ]);
-        $row = $stmt->fetch();
-        if ($row) {
-            return $row;
+        $trainers = self::all();
+        foreach ($trainers as $t) {
+            $fullName      = strtolower(trim((string)$t['full_name']));
+            $fullNameDot   = str_replace(' ', '.', $fullName);
+            $fullNameUnder = str_replace(' ', '_', $fullName);
+            $firstName     = explode(' ', $fullName)[0] ?? '';
+
+            if ($fullName === $cleanEmailName
+                || $fullNameDot === $emailPrefix
+                || $fullName === $rawUsername
+                || $fullNameUnder === $rawUsername
+                || ($cleanUsername !== '' && ($fullName === $cleanUsername || $firstName === $cleanUsername))
+            ) {
+                return $t;
+            }
         }
 
         // 3. Fallback for seed data where user_id 2=trainer 1, 3=trainer 2, 4=trainer 3
